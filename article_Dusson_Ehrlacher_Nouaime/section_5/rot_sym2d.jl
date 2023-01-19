@@ -65,12 +65,12 @@ end
 # 
 
 
-for (i, t) in enumerate(T)
-   P = surface(X, X, barydens[i], c=:viridis, grid=:false, zlim=(0.0, 3.0), camera=(10, 50), colorbar=:false, yformatter=_ -> "", xformatter=_ -> "", zformatter=_ -> "")
-   display(P)
-   sleep(0.5)
-   savefig("data_article_Dusson_Ehrlacher_Nouaime/section5_rotsym/bary_mw2_2d_surface$i.pdf")
-end
+# for (i, t) in enumerate(T)
+#    P = surface(X, X, barydens[i], c=:viridis, grid=:false, zlim=(0.0, 3.0), camera=(10, 50), colorbar=:false, yformatter=_ -> "", xformatter=_ -> "", zformatter=_ -> "")
+#    display(P)
+#    sleep(0.5)
+#    savefig("data_article_Dusson_Ehrlacher_Nouaime/section5_rotsym/bary_mw2_2d_surface$i.pdf")
+# end
 
 XY = [[X[i]; X[j]] for i = 1:nx for j = 1:nx]
 a0dens = 1e-16 .+ density.(Ref(M0), XY)
@@ -104,9 +104,9 @@ for (i, t) in enumerate(T)
    savefig("data_article_Dusson_Ehrlacher_Nouaime/section5_rotsym/bary_w2_2d_contour$i.pdf")
 end
 
-for (i, t) in enumerate(T)
-   P = surface(X, X, (reshape(baryw2[i], nx, nx))', c=:viridis, grid=:false, zlim=(0.0, 3.0), camera=(10, 50), colorbar=:false, yformatter=_ -> "", xformatter=_ -> "", zformatter=_ -> "")
-   display(P)
-   sleep(0.5)
-   savefig("data_article_Dusson_Ehrlacher_Nouaime/section5_rotsym/bary_w2_2d_surface$i.pdf")
-end
+# for (i, t) in enumerate(T)
+#    P = surface(X, X, (reshape(baryw2[i], nx, nx))', c=:viridis, grid=:false, zlim=(0.0, 3.0), camera=(10, 50), colorbar=:false, yformatter=_ -> "", xformatter=_ -> "", zformatter=_ -> "")
+#    display(P)
+#    sleep(0.5)
+#    savefig("data_article_Dusson_Ehrlacher_Nouaime/section5_rotsym/bary_w2_2d_surface$i.pdf")
+# end
