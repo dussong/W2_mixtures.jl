@@ -64,11 +64,11 @@ function bar(t, M0::mixture{T}, M1::mixture{T}) where {T}
    return mixture(K, p, at)
 end
 
-function cost_matrix_mix(gmm::Vector{mixture{T}}) where {T}
+function cost_matrix_mix(gmm::Vector{mixture{T}}, λs::Vector) where {T}
    nMarginal = length(gmm) # number of marginals
    KK = [gmm[k].K for k in 1:nMarginal] #number of elements in each mixture
    C = Array{Float64}(undef, KK...)
-   λs = 1 / nMarginal * ones(1, nMarginal)
+   # λs = 1 / nMarginal * ones(1, nMarginal)
    for k in CartesianIndices(C)
       _, cost = barmulti(λs, [gmm[j].at[k[j]] for j in 1:nMarginal])
       C[k] = cost
@@ -76,11 +76,11 @@ function cost_matrix_mix(gmm::Vector{mixture{T}}) where {T}
    return C
 end
 
-function wmulti(gmm::Vector{mixture{T}}) where {T}
+function wmulti(gmm::Vector{mixture{T}}, λs::Vector) where {T}
    n = length(gmm)
    KK = [gmm[k].K for k in 1:n]
    nb_unknowns = prod(KK)
-   Cmatrix = cost_matrix_mix(gmm)
+   Cmatrix = cost_matrix_mix(gmm, λs)
    Cflat = reshape(Cmatrix, nb_unknowns)
    Indices = reshape(CartesianIndices(Cmatrix), nb_unknowns)
 
@@ -107,7 +107,7 @@ function bar(λs::Vector, gmm::Vector{mixture{T}}) where {T}
    @assert(abs.(sum(λs) - 1.0) < 1e-10)
    @assert(length(λs) == length(gmm))
    n = length(λs)
-   w, indices = wmulti(gmm)
+   w, indices = wmulti(gmm, λs)
    k = 0
    Pi = Float64[]
    gtot = T[]

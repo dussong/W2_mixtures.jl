@@ -20,7 +20,7 @@ XX = [[X[i]; X[j]] for i = 1:nx, j = 1:nx]
 SN = perm_group(2) #define group
 ga = perm_antisym() #define group action
 
-# Define two a-sym mixtures based on gaussian distributions
+# Define four a-sym mixtures based on gaussian distributions
 m0 = [0.3; 0.7]
 Σ0 = [0.01 0.0; 0.0 0.01]
 @assert(isvalid(gauss(m0, Σ0)))
@@ -45,8 +45,78 @@ m3 = [0.4; 0.2]
 a3 = gauss(m3, Σ3)
 A3 = gsa(a3, SN, ga)
 
+m4 = [0.5; 0.3]
+Σ4 = [0.01 0.0; 0.0 0.01]
+@assert(isvalid(gauss(m4, Σ4)))
+a4 = gauss(m4, Σ4)
+A4 = gsa(a4, SN, ga)
+
+m5 = [0.7; 0.75]
+Σ5 = [0.01 0.0; 0.0 0.01]
+@assert(isvalid(gauss(m5, Σ5)))
+a5 = gauss(m5, Σ5)
+A5 = gsa(a5, SN, ga)
+
+m6 = [0.6; 0.2]
+Σ6 = [0.01 0.0; 0.0 0.01]
+@assert(isvalid(gauss(m6, Σ6)))
+a6 = gauss(m6, Σ6)
+A6 = gsa(a6, SN, ga)
+
 M0 = mixture(2, [0.5; 0.5], [A0; A1])
 M1 = mixture(2, [0.4; 0.6], [A2; A3])
+M2 = mixture(3, [0.3; 0.3; 0.4], [A0; A5; A6])
+M3 = mixture(3, [0.3; 0.3; 0.4], [A4; A5; A6])
+
+v1 = [ 1.; 0.; 0.; 0. ]
+v2 = [ 0.; 1.; 0.; 0. ]
+v3 = [ 0.; 0.; 1.; 0. ]
+v4 = [ 0.; 0.; 0.; 1. ]
+ms = [ M0; M1; M2; M3 ]
+nb_images = 5
+
+
+contour(X, X, density.(Ref(M0), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false)
+
+contour(X, X, density.(Ref(M1), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false)
+
+contour(X, X, density.(Ref(M2), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false)
+
+contour(X, X, density.(Ref(M3), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false)
+
+originals = []
+for i in 1:nb_images
+   for j in 1:nb_images
+      tx = (i-1) / (nb_images - 1)
+      ty = (j-1) / (nb_images - 1)
+      tmp1 = (1 - tx) * v1 + tx * v2
+      tmp2 = (1 - tx) * v3 + tx * v4
+      λ = (1 - ty) * tmp1 + ty * tmp2
+      @show λ
+      @show typeof(λ)
+      @show typeof(ms)
+      bt = bar(λ, ms)
+      P = contour(X, X, density.(Ref(bt), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false)
+      display(P)
+
+      push!(originals, contour(X, X, density.(Ref(bt), XX), c=:viridis, aspect_ratio=:equal, clim=(0.0, 10.), fill=:false, yformatter=_ -> "", xformatter=_ -> "", colorbar=:false))
+
+      println("Contour ($i, $j) done.")
+   end
+end
+
+poriginals = plot(originals..., size = nb_images .* (512, 512), layout = grid(nb_images, nb_images))
+savefig(poriginals, save_string * "originals.pdf")
+save_object(save_string * "originals.jld2", save_originals)
+
+pmodifieds = plot(modifieds..., size = nb_images .* (512, 512), layout = grid(nb_images, nb_images))
+savefig(pmodifieds, save_string * "modifieds.pdf")
+save_object(save_string * "modifieds.jld2", save_modifieds)
+
+save_object(save_string * "distances.jld2", distances)
+
+
+
 
 # MW2 barycenter
 baryvec = []

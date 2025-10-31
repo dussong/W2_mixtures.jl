@@ -58,10 +58,10 @@ function group_action(::rot_sym, a::loc_scat, g)
    return loc_scat(ms, Σs, a.d)
 end
 
-function _W2(A0::gsa{T1,rot_group,rot_sym}, A1::gsa{T1,rot_group,rot_sym}) where {T1,T3}
-   @assert length(A0.a.m) == 2
-   # solve optim problem
-end
+# function _W2(A0::gsa{T1,rot_group,rot_sym}, A1::gsa{T1,rot_group,rot_sym}) where {T1,T3}
+#    @assert length(A0.a.m) == 2
+#    # solve optim problem
+# end
 
 function _W2(A0::gsa{T1,rot_group,rot_sym}, A1::gsa{T1,rot_group,rot_sym}) where {T1}
    function g(θ)
@@ -126,6 +126,24 @@ function density(A::gsa{loc_scat{Gauss},perm_group,perm_antisym}, x)
                    exp(-1 / 2 * (x - a2.m)' * inv(a2.Σ) * (x - a2.m)))^2
 end
 
+
+function density(A::gsa{loc_scat{Slater},perm_group,perm_antisym}, x)
+   N = length(A.G.G)
+   # TODO: to modify
+   @assert A.G.n == 2
+   a1 = group_action(A.ga, A.a, A.G.G[1])
+   a2 = group_action(A.ga, A.a, A.G.G[2])
+   c = (1 / sqrt(det(inv(a1.Σ) / pi))
+        +
+        1 / sqrt(det(inv(a2.Σ) / pi))
+        -
+        2 * (exp(-1 / 2 * (a1.m - a2.m)' * inv(a1.Σ + a2.Σ) * (a1.m - a2.m)) / sqrt(det((inv(a1.Σ) + inv(a2.Σ)) / (2 * pi))))
+   )
+   return 1 / c * (exp(-1 / 2 * (x - a1.m)' * inv(a1.Σ) * (x - a1.m))
+                   -
+                   exp(-1 / 2 * (x - a2.m)' * inv(a2.Σ) * (x - a2.m)))^2
+end
+
 function density(A::gsa{T1,rot_group,rot_sym}, x) where {T1}
    # density evaluated with numerical sum
    N = 200
@@ -137,6 +155,34 @@ function bar(t, A0::gsa{T1,T2,T3}, A1::gsa{T1,T2,T3}) where {T1,T2,T3} #barycent
    @assert(t <= 1 && t >= 0)
    _, g = _W2(A0, A1)
    return gsa(bar(t, A0.a, group_action(A0.ga, A1.a, g)), A0.G, A0.ga)
+end
+
+# hack for 4 functions and antisymmetric group action
+function _mW2(A0::gsa{T1,T2,T3}, A1::gsa{T1,T2,T3}, A2::gsa{T1,T2,T3}, A3::gsa{T1,T2,T3}, λs) where {T1,T2,T3}
+   gmin = A0
+   mw2g = 1e10
+   for g1 in A0.G.G
+      for g2 in A0.G.G
+         for g3 in A0.G.G
+            v = [A0;group_action(A1.ga, A1.a, g1);
+                                  group_action(A2.ga, A2.a, g2);
+                                  group_action(A3.ga, A3.a, g3)]
+            gb, c = barmulti(λs, [A0.a;group_action(A1.ga, A1.a, g1);
+                                  group_action(A2.ga, A2.a, g2);
+                                  group_action(A3.ga, A3.a, g3)])
+            if c < mw2g
+               mw2g = c 
+               gmin = gb
+            end
+         end
+      end
+   end
+   return gmin, mw2g
+end
+
+function barmulti(λs, gs::Vector{gsa{T1, T2, T3}}) where {T1, T2, T3}
+   gmin, c = _mW2(gs[1], gs[2], gs[3], gs[4], λs)
+   return gsa(gmin, perm_group(2), perm_antisym()), c
 end
 
 # function barmulti(λs, gs::Vector{loc_scat{T}}; Niter=15) where {T}
