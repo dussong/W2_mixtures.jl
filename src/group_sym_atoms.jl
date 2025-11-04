@@ -126,24 +126,6 @@ function density(A::gsa{loc_scat{Gauss},perm_group,perm_antisym}, x)
                    exp(-1 / 2 * (x - a2.m)' * inv(a2.Σ) * (x - a2.m)))^2
 end
 
-
-function density(A::gsa{loc_scat{Slater},perm_group,perm_antisym}, x)
-   N = length(A.G.G)
-   # TODO: to modify
-   @assert A.G.n == 2
-   a1 = group_action(A.ga, A.a, A.G.G[1])
-   a2 = group_action(A.ga, A.a, A.G.G[2])
-   c = (1 / sqrt(det(inv(a1.Σ) / pi))
-        +
-        1 / sqrt(det(inv(a2.Σ) / pi))
-        -
-        2 * (exp(-1 / 2 * (a1.m - a2.m)' * inv(a1.Σ + a2.Σ) * (a1.m - a2.m)) / sqrt(det((inv(a1.Σ) + inv(a2.Σ)) / (2 * pi))))
-   )
-   return 1 / c * (exp(-1 / 2 * (x - a1.m)' * inv(a1.Σ) * (x - a1.m))
-                   -
-                   exp(-1 / 2 * (x - a2.m)' * inv(a2.Σ) * (x - a2.m)))^2
-end
-
 function density(A::gsa{T1,rot_group,rot_sym}, x) where {T1}
    # density evaluated with numerical sum
    N = 200
