@@ -6,7 +6,7 @@ group invariant measures* by Geneviève Dusson, Virginie Ehrlacher, and Nathalie
 
 ## Requirements
 
-To run the code, you need Julia 1.7 with the following packages:
+To run the code, you need Julia 1.10 with the following packages:
 
 LinearAlgebra, Combinatorics, Optim, Cubature, GLPK, JuMP, Plots, PyCall, QuadGK, SpecialFunctions, Test
 
